@@ -33,12 +33,12 @@
     document.addEventListener('DOMContentLoaded', function() {
       var calendarEl = document.getElementById('calendar');
       var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek',   // Vista semanal con horarios
+        initialView: 'timeGridWeek',
         locale: 'es',
         selectable: true,
-        allDaySlot: false,             // Ocultar franja "todo el día"
-        slotMinTime: "08:00:00",       // Hora mínima (ej: 8 AM)
-        slotMaxTime: "23:00:00",       // Hora máxima (ej: 11 PM)
+        allDaySlot: false,             
+        slotMinTime: "14:00:00",        
+        slotMaxTime: "23:00:00",        
         events: [
           { title: 'Cancha 1 Reservada', start: '2025-09-23T18:00:00', end: '2025-09-23T19:00:00' },
           { title: 'Cancha 2 Reservada', start: '2025-09-25T20:00:00', end: '2025-09-25T21:00:00' }

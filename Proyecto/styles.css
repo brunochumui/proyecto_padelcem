@@ -109,6 +109,10 @@ nav a:hover {
   cursor: pointer;
   transition: background 0.3s ease;
 }
+a{
+  text-decoration: none;
+  color: black;
+}
 
 .cta button:hover {
   background-color: #dfd3be;
