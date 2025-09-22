@@ -18,7 +18,7 @@ body {
 }
 
 .hero {
-  background: url('cancha-padel.jpg') center/cover no-repeat;
+  background: url('imagenes/cancha-padel.jpg') center/cover no-repeat;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -57,10 +57,12 @@ nav a {
   font-weight: 500;
   font-size: 1.1rem;
   transition: color 0.3s ease;
+  transition: 0.4s;
 }
 
 nav a:hover {
   color: #f3eadd;
+  transform: scale(1.1);
 }
 
 .section {
