@@ -98,7 +98,7 @@ nav a:hover {
   margin-bottom: 1rem;
 }
 
-.cta button {
+.btn {
   background-color: var(--color-beige);
   color: var(--color-dark);
   border: none;
@@ -114,8 +114,8 @@ a{
   color: black;
 }
 
-.cta button:hover {
-  background-color: #dfd3be;
+.btn:hover {
+  background-color: green;
 }
 
 footer {

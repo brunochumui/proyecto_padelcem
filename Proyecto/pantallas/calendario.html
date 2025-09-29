@@ -1,12 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario</title>
-</head>
-<body>
-    <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -14,56 +6,83 @@
   <title>Calendario Canchas Pádel</title>
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-    }
-    #calendar {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-      max-height: 565px;
-      background-color: rgba(119, 116, 116, 0.481);
-      border-radius: 25px;
-    }
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    #calendar { max-width: 900px; margin: auto; padding: 20px; max-height: 565px; background-color: rgba(119,116,116,0.48); border-radius: 25px; }
+    #reservarBtn { display: block; margin: 20px auto; padding: 10px 20px; font-size: 18px; border-radius: 10px; background-color: #00a650; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
   <h2>Reservas de Canchas de Pádel</h2>
+  <button id="reservarBtn">Pagar y confirmar reserva</button>
   <div id="calendar"></div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var calendarEl = document.getElementById('calendar');
-      var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek',
-        locale: 'es',
-        selectable: true,
-        allDaySlot: false,             
-        slotMinTime: "14:00:00",        
-        slotMaxTime: "23:00:00",        
-        events: [
-          { title: 'Cancha 1 Reservada', start: '2025-09-23T18:00:00', end: '2025-09-23T19:00:00' },
-          { title: 'Cancha 2 Reservada', start: '2025-09-25T20:00:00', end: '2025-09-25T21:00:00' }
-        ],
-        select: function(info) {
-          let cancha = prompt("¿Qué cancha quieres reservar? (ej: Cancha 1, Cancha 2)");
-          if (cancha) {
-            calendar.addEvent({
-              title: cancha + ' Reservada',
-              start: info.start,
-              end: info.end
-            });
-            alert("Reserva confirmada para " + cancha + " el " + info.start.toLocaleString());
-          }
-        }
-      });
-      calendar.render();
-    });
-  </script>
-</body>
-</html>
+    const calendarEl = document.getElementById('calendar');
+    let selectedSlot = null;  // Fecha/hora elegida
+    let pagoCompletado = false;
 
+    // Inicializar calendario
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'timeGridWeek',
+      locale: 'es',
+      selectable: true,
+      allDaySlot: false,
+      slotMinTime: "14:00:00",
+      slotMaxTime: "23:00:00",
+      events: [],
+      select: function(info) {
+        selectedSlot = info;
+        alert(`Seleccionaste el horario: ${info.start.toLocaleString()}\nAhora hacé clic en 'Pagar y confirmar reserva'.`);
+      }
+    });
+
+    calendar.render();
+
+
+    // Botón de pago
+    document.getElementById("reservarBtn").addEventListener("click", async () => {
+      if (!selectedSlot) {
+        alert("Primero seleccioná un horario en el calendario.");
+        return;
+      }
+
+      // Llamada al backend para crear preference
+
+      const response = await fetch("http://localhost:8080/create_preference", { method: "POST" });
+      const data = await response.json();
+      if (data.link) {
+        window.location.href = data.link; // Redirige al checkout de Mercado Pago
+      } else {
+        alert("No se pudo generar el link de pago.");
+        return;
+      }
+
+      // Simulación: luego de pago, agregar evento
+      setTimeout(() => {
+        pagoCompletado = true;
+
+        calendar.addEvent({
+          title: "Cancha Reservada",
+          start: selectedSlot.start,
+          end: selectedSlot.end
+        });
+
+        alert("✅ Pago confirmado y reserva realizada!");
+        selectedSlot = null; // reiniciar selección
+      }, 5000);
+    });
+    {
+  "mcpServers"; {
+    "mercadopago-mcp-server-prod"; {
+      "url"; "https://mcp.mercadopago.com/mcp",
+      "headers"; {
+        "Authorization"; "Bearer <ACCESS_TOKEN>"
+      }
+    }
+  }
+}
+  </script>
 </body>
 </html>
