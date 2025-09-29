@@ -1,6 +1,6 @@
 :root {
-  --color-dark: #151515;
-  --color-beige: #1bbbff;
+  --color-dark: #f1f1f1;
+  --color-beige: #1E3D59;
   --color-light: #ffffff;
   --font-main: 'Outfit', sans-serif;
 }
@@ -18,7 +18,7 @@ body {
 }
 
 .hero {
-  background: url('imagenes/cancha-padel.jpg') center/cover no-repeat;
+  background: url('imagenes/fondo.jpg') center/cover no-repeat;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -83,7 +83,7 @@ nav a:hover {
   line-height: 1.8;
   max-width: 700px;
   margin: 0 auto;
-  color: #333;
+  color: #b1b1b1;
 }
 
 .cta {
