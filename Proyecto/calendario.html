@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario</title>
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario Canchas Pádel</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    #calendar {
+      max-width: 900px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>Reservas de Canchas de Pádel</h2>
+  <div id="calendar"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',   // Vista semanal con horarios
+        locale: 'es',
+        selectable: true,
+        allDaySlot: false,             // Ocultar franja "todo el día"
+        slotMinTime: "08:00:00",       // Hora mínima (ej: 8 AM)
+        slotMaxTime: "23:00:00",       // Hora máxima (ej: 11 PM)
+        events: [
+          { title: 'Cancha 1 Reservada', start: '2025-09-23T18:00:00', end: '2025-09-23T19:00:00' },
+          { title: 'Cancha 2 Reservada', start: '2025-09-25T20:00:00', end: '2025-09-25T21:00:00' }
+        ],
+        select: function(info) {
+          let cancha = prompt("¿Qué cancha quieres reservar? (ej: Cancha 1, Cancha 2)");
+          if (cancha) {
+            calendar.addEvent({
+              title: cancha + ' Reservada',
+              start: info.start,
+              end: info.end
+            });
+            alert("Reserva confirmada para " + cancha + " el " + info.start.toLocaleString());
+          }
+        }
+      });
+      calendar.render();
+    });
+  </script>
+</body>
+</html>
+
+</body>
+</html>
