@@ -1,3 +1,4 @@
+
 :root {
   --color-dark: #f1f1f1;
   --color-beige: #1E3D59;
@@ -49,6 +50,7 @@ nav {
   gap: 2rem;
   padding: 1.5rem 2rem;
   background-color: rgba(0, 0, 0, 0.5);
+  position: fixed; 
 }
 
 nav a {

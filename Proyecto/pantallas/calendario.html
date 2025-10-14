@@ -8,9 +8,81 @@
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    #calendar { max-width: 900px; margin: auto; padding: 20px; max-height: 565px; background-color: rgba(119,116,116,0.48); border-radius: 25px; }
-    #reservarBtn { display: block; margin: 20px auto; padding: 10px 20px; font-size: 18px; border-radius: 10px; background-color: #00a650; color: white; border: none; cursor: pointer; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f2f2f2;
+      text-align: center;
+    }
+
+    h2 {
+      color: #333;
+      font-size: 1.6rem;
+      margin-bottom: 15px;
+    }
+
+    #calendar {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 15px;
+      background-color: rgba(119, 116, 116, 0.48);
+      border-radius: 20px;
+      box-sizing: border-box;
+    }
+
+    #reservarBtn {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 25px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 10px;
+      background-color: #00a650;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #reservarBtn:hover {
+      background-color: #009244;
+    }
+
+    /* 📱 Ajustes para pantallas pequeñas */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      #calendar {
+        padding: 10px;
+        max-height: none;
+      }
+
+      #reservarBtn {
+        width: 90%;
+        font-size: 0.95rem;
+        padding: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      #reservarBtn {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -20,69 +92,52 @@
 
   <script>
     const calendarEl = document.getElementById('calendar');
-    let selectedSlot = null;  // Fecha/hora elegida
+    let selectedSlot = null;
     let pagoCompletado = false;
 
-    // Inicializar calendario
     const calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'timeGridWeek',
+      initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
       locale: 'es',
       selectable: true,
       allDaySlot: false,
       slotMinTime: "14:00:00",
       slotMaxTime: "23:00:00",
+      height: "auto",
+      expandRows: true,
       events: [],
       select: function(info) {
         selectedSlot = info;
-        alert(`Seleccionaste el horario: ${info.start.toLocaleString()}\nAhora hacé clic en 'Pagar y confirmar reserva'.`);
       }
     });
 
     calendar.render();
 
-
-    // Botón de pago
     document.getElementById("reservarBtn").addEventListener("click", async () => {
       if (!selectedSlot) {
         alert("Primero seleccioná un horario en el calendario.");
         return;
       }
 
-      // Llamada al backend para crear preference
-
       const response = await fetch("http://localhost:8080/create_preference", { method: "POST" });
       const data = await response.json();
       if (data.link) {
-        window.location.href = data.link; // Redirige al checkout de Mercado Pago
+        window.location.href = data.link;
       } else {
         alert("No se pudo generar el link de pago.");
         return;
       }
 
-      // Simulación: luego de pago, agregar evento
       setTimeout(() => {
         pagoCompletado = true;
-
         calendar.addEvent({
           title: "Cancha Reservada",
           start: selectedSlot.start,
           end: selectedSlot.end
         });
-
         alert("✅ Pago confirmado y reserva realizada!");
-        selectedSlot = null; // reiniciar selección
+        selectedSlot = null;
       }, 5000);
     });
-    {
-  "mcpServers"; {
-    "mercadopago-mcp-server-prod"; {
-      "url"; "https://mcp.mercadopago.com/mcp",
-      "headers"; {
-        "Authorization"; "Bearer <ACCESS_TOKEN>"
-      }
-    }
-  }
-}
   </script>
 </body>
 </html>
