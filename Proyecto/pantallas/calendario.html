@@ -12,22 +12,30 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
-      background-color: #f2f2f2;
+      background-image: url(../imagenes/Calendario.jpg);
       text-align: center;
+      background-size: cover;
+      position: relative;
     }
 
     h2 {
-      color: #333;
+      color: #e0cfcf;
       font-size: 1.6rem;
       margin-bottom: 15px;
+      padding: 4px;
     }
+    .titulo{
+      font-size: 50px;
+      color: white;
+    }
+  
 
     #calendar {
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
       padding: 15px;
-      background-color: rgba(119, 116, 116, 0.48);
+      background-color: #1e3d59aa;
       border-radius: 20px;
       box-sizing: border-box;
     }
@@ -48,6 +56,24 @@
 
     #reservarBtn:hover {
       background-color: #009244;
+    }
+
+    .volver-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 10px 18px;
+      font-size: 1.3rem;
+      border-radius: 8px;
+      background-color: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .volver-btn:hover {
+      background-color: #222;
     }
 
     /* 📱 Ajustes para pantallas pequeñas */
@@ -86,8 +112,9 @@
   </style>
 </head>
 <body>
-  <h2>Reservas de Canchas de Pádel</h2>
-  <button id="reservarBtn">Pagar y confirmar reserva</button>
+   <button class="volver-btn" id="volverBtn">Volver</button>
+  <h2 class="titulo">Reservas de Canchas de Pádel</h2>
+  <button id="reservarBtn" onclick="index.html">Pagar y confirmar reserva</button>
   <div id="calendar"></div>
 
   <script>
@@ -106,7 +133,18 @@
       expandRows: true,
       events: [],
       select: function(info) {
-        selectedSlot = info;
+       
+        const cancha = prompt("Elegí la cancha: 1 o 2");
+        if (cancha === "1" || cancha === "2") {
+          selectedSlot = {
+            ...info,
+            cancha: cancha
+          };
+          alert(`Horario seleccionado: ${info.startStr} a ${info.endStr}\nCancha: ${cancha}`);
+        } else {
+          selectedSlot = null;
+          alert("Debés elegir una cancha válida (1 o 2).");
+        }
       }
     });
 
@@ -114,7 +152,7 @@
 
     document.getElementById("reservarBtn").addEventListener("click", async () => {
       if (!selectedSlot) {
-        alert("Primero seleccioná un horario en el calendario.");
+        alert("Primero seleccioná un horario y una cancha en el calendario.");
         return;
       }
 
@@ -130,13 +168,17 @@
       setTimeout(() => {
         pagoCompletado = true;
         calendar.addEvent({
-          title: "Cancha Reservada",
+          title: `Cancha ${selectedSlot.cancha} Reservada`,
           start: selectedSlot.start,
           end: selectedSlot.end
         });
         alert("✅ Pago confirmado y reserva realizada!");
         selectedSlot = null;
       }, 5000);
+    });
+
+    document.getElementById("volverBtn").addEventListener("click", () => {
+      window.location.href = "index.html";
     });
   </script>
 </body>
