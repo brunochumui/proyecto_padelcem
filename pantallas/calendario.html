@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario Canchas Pádel</title>
+  
+  <link rel="stylesheet" href="../calendario.css">
+</head>
+<body>
+   <button class="volver-btn" id="volverBtn">Volver</button>
+  <h2 class="titulo">Reservas de Canchas de Pádel</h2>
+  <button id="reservarBtn" onclick="index.html">Pagar y confirmar reserva</button>
+  <div id="calendar"></div>
+ 
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+  
+  <script>
+    const calendarEl = document.getElementById('calendar');
+    let selectedSlot = null;
+    let pagoCompletado = false;
+
+const calendar = new FullCalendar.Calendar(calendarEl, {
+  initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
+  locale: 'es',
+  selectable: true,
+  allDaySlot: false,
+  slotDuration: "01:30:00",
+  slotLabelFormat: {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  },
+  height: "auto",
+  expandRows: true,
+  events: [],
+  // mostrar desde 16:00 hasta 22:30 por defecto; ajustaremos en datesSet
+  slotMinTime: "16:00:00",
+  slotMaxTime: "22:30:00",
+  datesSet: function(info) {
+    // quitar bloques de fondo anteriores
+    calendar.getEvents()
+      .filter(e => e.extendedProps && e.extendedProps.isBlockedBg)
+      .forEach(e => e.remove());
+
+    // Si estamos en vista día: ajustar min/max según día concreto
+    if (info.view.type === 'timeGridDay') {
+      const day = new Date(info.start).getDay(); // 0=Dom,6=Sáb
+      if (day === 0 || day === 4) {
+        calendar.setOption('slotMinTime', '16:00:00');
+        calendar.setOption('slotMaxTime', '22:00:00');
+      } else {
+        calendar.setOption('slotMinTime', '16:30:00');
+        calendar.setOption('slotMaxTime', '22:30:00');
+      }
+      return;
+    }
+
+    // Para vistas de varias columnas (semana): mantener 16:00-22:30 y bloquear rangos no permitidos por día
+    calendar.setOption('slotMinTime', '16:00:00');
+    calendar.setOption('slotMaxTime', '22:30:00');
+
+    // crear bloques de fondo para cada día visible
+    const start = new Date(info.start);
+    const end = new Date(info.end);
+    const dayIter = new Date(start);
+
+    while (dayIter < end) {
+      const y = dayIter.getFullYear(), m = dayIter.getMonth(), d = dayIter.getDate();
+      const dayIndex = dayIter.getDay();
+
+      if (dayIndex >= 1 && dayIndex <= 5) {
+        // Lunes a viernes: bloquear 16:00 - 16:30 (porque apertura real 16:30)
+        calendar.addEvent({
+          start: new Date(y, m, d, 16, 0, 0),
+          end:   new Date(y, m, d, 16, 30, 0),
+          display: 'background',
+          backgroundColor: 'rgba(0,0,0,0.18)',
+          extendedProps: { isBlockedBg: true }
+        });
+      } else {
+        // Sábado/Domingo: bloquear 22:00 - 22:30 (porque cierre real 22:00)
+        calendar.addEvent({
+          start: new Date(y, m, d, 22, 0, 0),
+          end:   new Date(y, m, d, 22, 30, 0),
+          display: 'background',
+          backgroundColor: 'rgba(0,0,0,0.18)',
+          extendedProps: { isBlockedBg: true }
+        });
+      }
+
+      dayIter.setDate(dayIter.getDate() + 1);
+    }
+  },
+  select: function(info) {
+    const cancha = prompt("Elegí la cancha: 1 o 2");
+    if (cancha === "1" || cancha === "2") {
+      selectedSlot = { ...info, cancha: cancha };
+      alert(`Horario seleccionado: ${info.startStr} a ${info.endStr}\nCancha: ${cancha}`);
+    } else {
+      selectedSlot = null;
+      alert("Debés elegir una cancha válida (1 o 2).");
+    }
+  }
+});
+
+    calendar.render();
+
+    document.getElementById("reservarBtn").addEventListener("click", async () => {
+      if (!selectedSlot) {
+        alert("Primero seleccioná un horario y una cancha en el calendario.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:8080/create_preference", { method: "POST" });
+      const data = await response.json();
+      if (data.link) {
+        window.location.href = data.link;
+      } else {
+        alert("No se pudo generar el link de pago.");
+        return;
+      }
+
+      setTimeout(() => {
+        pagoCompletado = true;
+        calendar.addEvent({
+          title: `Cancha ${selectedSlot.cancha} Reservada`,
+          start: selectedSlot.start,
+          end: selectedSlot.end
+        });
+        alert("✅ Pago confirmado y reserva realizada!");
+        selectedSlot = null;
+      }, 5000);
+    });
+
+    document.getElementById("volverBtn").addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>
