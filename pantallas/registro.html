@@ -7,25 +7,24 @@
     <link rel="stylesheet" href="../registro.css">
 </head>
 <body>
-  <form action="registrousuario.php" method="POST"></form>
+  <form action="registrousuario.php" method="POST">
     <div class="registro">
     <h2>registrate</h2>
-    <form>
         <div class="input-group">
           <label for="email">email:</label>
-          <input type="email" id="email" not null >
+          <input type="email" id="email" required >
         </div>
         <div class="input-group">
           <label for="password">contraseña:</label>
-          <input type="password" name="contraseña" id="password" not null>
+          <input type="password" name="contraseña" id="password" required>
         </div>
         <div class="input-group">
          <label for="nombre">nombre:</label>
-         <input type="text" name="nombre" id="nombre" not null>
+         <input type="text" name="nombre" id="nombre" required>
         </div>
         <div class="input-group">
          <label for="apellido">telefono</label>
-         <input type="text" name="apellido" id="apellido" not null>
+         <input type="text" name="apellido" id="apellido" required>
         </div>
         <button type="submit">Enviar</button>
     </form>

@@ -3,19 +3,28 @@ include('conexion.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre = $_POST['nombre'];
-    $correo = $_POST['correo'];
+    $correo = $_POST['email'];
     $telefono = $_POST['telefono'];
-    $contraseña = $_POST['clave'];
+    $contraseña = password_hash($_POST['contraseña'], PASSWORD_DEFAULT); // más seguro
 
-    $sql = "INSERT INTO usuarios (Nombre, Correo, Telefono, C)
-            VALUES ('$nombre', '$correo', '$telefono', '$contraseña')";
+    // Verificar si el correo ya existe
+    $verificar = "SELECT * FROM usuarios WHERE Correo='$correo'";
+    $resultado = mysqli_query($conexion, $verificar);
 
-    if ($conn->query($sql) === TRUE) {
-        echo "✅ Usuario registrado correctamente.";
-    } else {
-        echo "❌ Error: " . $conn->error;
+    if (mysqli_num_rows($resultado) > 0) {
+        echo "<script>alert('El correo ya está registrado'); window.location.href='registro.html';</script>";
+        exit;
     }
 
-    $conn->close();
+    // Insertar nuevo usuario
+    $sql = "INSERT INTO usuarios (Nombre, Correo, Telefono, Clave) VALUES ('$nombre', '$correo', '$telefono', '$contraseña')";
+    if (mysqli_query($conexion, $sql)) {
+        // Redirigir al index después del registro
+        echo "<script>alert('Registro exitoso'); window.location.href='../index.html';</script>";
+    } else {
+        echo "Error: " . mysqli_error($conexion);
+    }
+
+    mysqli_close($conexion);
 }
 ?>
