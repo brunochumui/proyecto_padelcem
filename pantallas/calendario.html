@@ -4,151 +4,74 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendario Canchas Pádel</title>
+  <!-- FullCalendar CSS (cargar antes de tu CSS para que puedas sobreescribir) -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-  <script src="https://sdk.mercadopago.com/js/v2"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-image: url(../imagenes/Calendario.jpg);
-      text-align: center;
-      background-size: cover;
-      position: relative;
-    }
-
-    h2 {
-      color: #e0cfcf;
-      font-size: 1.6rem;
-      margin-bottom: 15px;
-      padding: 4px;
-    }
-    .titulo{
-      font-size: 50px;
-      color: white;
-    }
-  
-
-    #calendar {
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 15px;
-      background-color: #1e3d59aa;
-      border-radius: 20px;
-      box-sizing: border-box;
-    }
-
-    #reservarBtn {
-      display: block;
-      margin: 20px auto;
-      padding: 12px 25px;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 10px;
-      background-color: #00a650;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    #reservarBtn:hover {
-      background-color: #009244;
-    }
-
-    .volver-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      padding: 10px 18px;
-      font-size: 1.3rem;
-      border-radius: 8px;
-      background-color: #444;
-      color: white;
-      border: none;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    .volver-btn:hover {
-      background-color: #222;
-    }
-
-    /* 📱 Ajustes para pantallas pequeñas */
-    @media (max-width: 768px) {
-      body {
-        padding: 10px;
-      }
-
-      h2 {
-        font-size: 1.3rem;
-      }
-
-      #calendar {
-        padding: 10px;
-        max-height: none;
-      }
-
-      #reservarBtn {
-        width: 90%;
-        font-size: 0.95rem;
-        padding: 10px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      h2 {
-        font-size: 1.2rem;
-      }
-
-      #reservarBtn {
-        width: 100%;
-        padding: 12px;
-        font-size: 1rem;
-      }
-    }
-  </style>
+   <link rel="stylesheet" href="../calendario.css">
 </head>
 <body>
    <button class="volver-btn" id="volverBtn">Volver</button>
   <h2 class="titulo">Reservas de Canchas de Pádel</h2>
   <button id="reservarBtn" onclick="index.html">Pagar y confirmar reserva</button>
   <div id="calendar"></div>
-
+ 
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+  
   <script>
     const calendarEl = document.getElementById('calendar');
     let selectedSlot = null;
     let pagoCompletado = false;
 
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
-      locale: 'es',
-      selectable: true,
-      allDaySlot: false,
-      slotMinTime: "14:00:00",
-      slotMaxTime: "23:00:00",
-      height: "auto",
-      expandRows: true,
-      events: [],
-      select: function(info) {
-       
-        const cancha = prompt("Elegí la cancha: 1 o 2");
-        if (cancha === "1" || cancha === "2") {
-          selectedSlot = {
-            ...info,
-            cancha: cancha
-          };
-          alert(`Horario seleccionado: ${info.startStr} a ${info.endStr}\nCancha: ${cancha}`);
-        } else {
-          selectedSlot = null;
-          alert("Debés elegir una cancha válida (1 o 2).");
-        }
-      }
-    });
-
-    calendar.render();
+const calendar = new FullCalendar.Calendar(calendarEl, {
+  // Mostrar sólo UN DÍA a la vez; usar flechas para navegar entre días
+  initialView: 'timeGridDay',
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'timeGridDay'
+  },
+  locale: 'es',
+  selectable: true,
+  allDaySlot: false,
+  slotDuration: "01:30:00",
+  slotLabelFormat: {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  },
+  height: "auto",
+  expandRows: true,
+  events: [],
+  // slotMin/Max se ajustan según el día visible en datesSet
+  slotMinTime: "16:00:00",
+  slotMaxTime: "24:00:00", /* ampliado por defecto: +1:30 */
+  datesSet: function(info) {
+    // Ajustar la franja visible según el día actual (cuando se cambia con prev/next)
+    if (info.view.type !== 'timeGridDay') return;
+    const day = new Date(info.start).getDay(); // 0=Dom,6=Sáb
+    if (day === 0 || day === 6) {
+      // fines: antes 16:00-22:00 -> ahora 16:00-23:30 (más 1:30)
+      calendar.setOption('slotMinTime', '16:00:00');
+      calendar.setOption('slotMaxTime', '23:30:00');
+    } else {
+      // lunes-viernes: antes 16:30-22:30 -> ahora 16:30-24:00 (más 1:30)
+      calendar.setOption('slotMinTime', '16:30:00');
+      calendar.setOption('slotMaxTime', '24:00:00');
+    }
+  },
+  select: function(info) {
+    const cancha = prompt("Elegí la cancha: 1 o 2");
+    if (cancha === "1" || cancha === "2") {
+      selectedSlot = { ...info, cancha: cancha };
+      alert(`Horario seleccionado: ${info.startStr} a ${info.endStr}\nCancha: ${cancha}`);
+    } else {
+      selectedSlot = null;
+      alert("Debés elegir una cancha válida (1 o 2).");
+    }
+  }
+});
+ 
+     calendar.render();
 
     document.getElementById("reservarBtn").addEventListener("click", async () => {
       if (!selectedSlot) {
