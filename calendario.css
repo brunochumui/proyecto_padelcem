@@ -31,7 +31,7 @@ body {
   background-color: rgba(30,61,89,0.9); /* #1e3d59e4 */
   border-radius: 20px;
   box-sizing: border-box;
-  color: #fff;
+  color: #9d9218;
   box-shadow: 0 6px 18px rgba(0,0,0,0.35);
 }
 
@@ -44,7 +44,7 @@ body {
   font-weight: bold;
   border-radius: 10px;
   background-color: #00a650;
-  color: white;
+  color: rgb(253, 253, 253);
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.08s ease;
@@ -73,7 +73,7 @@ body {
 .fc {
   color-scheme: light;
 }
-.fc .fc-toolbar-title { color: #fff; font-weight: 600; }
+.fc .fc-toolbar-title { color: #ffffff; font-weight: 600; }
 .fc .fc-toolbar, .fc .fc-toolbar > * { color: #fff; }
 .fc .fc-button {
   background: rgba(255,255,255,0.08);
@@ -86,7 +86,7 @@ body {
 .fc .fc-daygrid-event, .fc .fc-timegrid-event {
   background-color: #ff7a59;
   border: none;
-  color: #fff;
+  color: #ffffff;
   padding: 4px 6px;
   border-radius: 6px;
 }
