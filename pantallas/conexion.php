@@ -9,6 +9,7 @@ $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
     die("Error de conexión: " . $conn->connect_error);
 } else {
-    echo "✅ Conexión exitosa a la base de datos.";
+    // Conexión exitosa: no imprimir nada aquí para evitar ensuciar
+    // las respuestas JSON de las APIs (api.php, etc.).
 }
 ?>

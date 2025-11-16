@@ -60,14 +60,68 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
     }
   },
   select: function(info) {
-    const cancha = prompt("Elegí la cancha: 1 o 2");
-    if (cancha === "1" || cancha === "2") {
-      selectedSlot = { ...info, cancha: cancha };
-      alert(`Horario seleccionado: ${info.startStr} a ${info.endStr}\nCancha: ${cancha}`);
-    } else {
-      selectedSlot = null;
-      alert("Debés elegir una cancha válida (1 o 2).");
-    }
+    // Obtener canchas desde la API y mostrar un modal de selección
+    fetch('api.php')
+      .then(res => res.json())
+      .then(courts => {
+        if (!Array.isArray(courts) || courts.length === 0) {
+          alert('No hay canchas disponibles.');
+          return;
+        }
+
+        const modal = document.createElement('div');
+        Object.assign(modal.style, {
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.45)', zIndex: 9999
+        });
+
+        const box = document.createElement('div');
+        Object.assign(box.style, {
+          background: '#fff', padding: '18px', borderRadius: '8px',
+          maxWidth: '420px', width: '90%', boxShadow: '0 6px 24px rgba(0,0,0,0.2)'
+        });
+
+        const title = document.createElement('h3');
+        title.textContent = 'Elegí la cancha';
+        box.appendChild(title);
+
+       courts.forEach(court => {
+          const id = court.ID_cancha;
+          const tipo = court.Tipo;
+          const precio = court.Precio_hora;
+          const seña = 20000;
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = `Cancha ${id} — ${tipo} — $${precio} (seña $${seña})`;
+          Object.assign(btn.style, { display: 'block', width: '100%', margin: '8px 0', padding: '8px' });
+          btn.addEventListener('click', () => {
+            selectedSlot = { ...info, cancha: id, tipo: tipo, precio: precio };
+            document.body.removeChild(modal);
+            alert(`Horario seleccionado: ${info.startStr} a ${info.endStr}\nCancha: ${id}\nTipo: ${tipo}\nPrecio: $${precio}`);
+          });
+
+          box.appendChild(btn);
+        });
+
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.textContent = 'Cancelar';
+        Object.assign(cancel.style, { display: 'block', width: '100%', margin: '6px 0', padding: '8px', background: '#eee' });
+        cancel.addEventListener('click', () => {
+          selectedSlot = null;
+          document.body.removeChild(modal);
+        });
+        box.appendChild(cancel);
+
+        modal.appendChild(box);
+        document.body.appendChild(modal);
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error al cargar las canchas.');
+      });
   }
 });
  
@@ -78,7 +132,9 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
         alert("Primero seleccioná un horario y una cancha en el calendario.");
         return;
       }
-
+      // Mostrar resumen con precio/tipo antes de iniciar pago
+      const resumen = `Vas a reservar Cancha ${selectedSlot.cancha}\nTipo: ${selectedSlot.tipo || '—'}\nPrecio: $${selectedSlot.precio || '—'}\n\nConfirmar y continuar al pago?`;
+      if (!confirm(resumen)) return;
       const response = await fetch("http://localhost:8080/create_preference", { method: "POST" });
       const data = await response.json();
       if (data.link) {
