@@ -86,15 +86,14 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
         title.textContent = 'Elegí la cancha';
         box.appendChild(title);
 
-       courts.forEach(court => {
-          const id = court.ID_cancha;
-          const tipo = court.Tipo;
-          const precio = court.Precio_hora;
-          const seña = 20000;
+        courts.forEach(court => {
+          const id = court.id ?? court.numero ?? court.nombre ?? '';
+          const tipo = court.tipo ?? '—';
+          const precio = court.precio ?? court.precio_hora ?? '—';
 
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.textContent = `Cancha ${id} — ${tipo} — $${precio} (seña $${seña})`;
+          btn.textContent = `Cancha ${id} — ${tipo} — $${precio}`;
           Object.assign(btn.style, { display: 'block', width: '100%', margin: '8px 0', padding: '8px' });
           btn.addEventListener('click', () => {
             selectedSlot = { ...info, cancha: id, tipo: tipo, precio: precio };
