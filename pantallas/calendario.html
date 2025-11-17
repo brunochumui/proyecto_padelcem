@@ -87,13 +87,14 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
         box.appendChild(title);
 
         courts.forEach(court => {
-          const id = court.id ?? court.numero ?? court.nombre ?? '';
-          const tipo = court.tipo ?? '—';
-          const precio = court.precio ?? court.precio_hora ?? '—';
+          const id = court.ID_cancha ?? '—';
+          const tipo = court.Tipo ?? '—';
+          const precio = court.Precio_hora ?? '—';
+          const seña = court.Seña ?? '20000';
 
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.textContent = `Cancha ${id} — ${tipo} — $${precio}`;
+          btn.textContent = `Cancha ${id} — ${tipo} — $${precio} - Seña: $${seña}`;
           Object.assign(btn.style, { display: 'block', width: '100%', margin: '8px 0', padding: '8px' });
           btn.addEventListener('click', () => {
             selectedSlot = { ...info, cancha: id, tipo: tipo, precio: precio };
@@ -131,8 +132,8 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
         alert("Primero seleccioná un horario y una cancha en el calendario.");
         return;
       }
-      // Mostrar resumen con precio/tipo antes de iniciar pago
-      const resumen = `Vas a reservar Cancha ${selectedSlot.cancha}\nTipo: ${selectedSlot.tipo || '—'}\nPrecio: $${selectedSlot.precio || '—'}\n\nConfirmar y continuar al pago?`;
+      // Mostrar resumen con precio/tipo/horario antes de iniciar pago
+      const resumen = `Vas a reservar Cancha ${selectedSlot.cancha}\nTipo: ${selectedSlot.tipo || '—'}\nPrecio: $${selectedSlot.precio || '—'}\nHorario: ${selectedSlot.start.substring(11, 16)} a ${selectedSlot.end.substring(11, 16)}\n\nConfirmar y continuar al pago?`;
       if (!confirm(resumen)) return;
       const response = await fetch("http://localhost:8080/create_preference", { method: "POST" });
       const data = await response.json();
@@ -143,20 +144,32 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
         return;
       }
 
-      setTimeout(() => {
-        pagoCompletado = true;
-        calendar.addEvent({
-          title: `Cancha ${selectedSlot.cancha} Reservada`,
-          start: selectedSlot.start,
-          end: selectedSlot.end
-        });
-        alert("✅ Pago confirmado y reserva realizada!");
-        selectedSlot = null;
-      }, 5000);
-    });
+      setTimeout(async () => {
+  pagoCompletado = true;
 
-    document.getElementById("volverBtn").addEventListener("click", () => {
-      window.location.href = "index.html";
+  // GUARDAR EN LA BD
+  await fetch("guardar_reserva.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      cancha: selectedSlot.cancha,
+      inicio: selectedSlot.startStr,
+      fin: selectedSlot.endStr,
+      tipo: selectedSlot.tipo,
+      precio: selectedSlot.precio
+    })
+  });
+
+  // Mostrar en el calendario
+  calendar.addEvent({
+    title: `Cancha ${selectedSlot.cancha} Reservada`,
+    start: selectedSlot.start,
+    end: selectedSlot.end
+  });
+
+  alert("Pago confirmado y reserva guardada.");
+  selectedSlot = null;
+}, 5000);
     });
   </script>
 </body>
