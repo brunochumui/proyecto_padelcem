@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pago Aceptado</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f6f9fc;margin:0}
+    .card{background:#fff;padding:22px;border-radius:10px;box-shadow:0 8px 30px rgba(20,30,60,0.08);max-width:520px;width:90%}
+    h1{color:#0a7f3b;margin:0 0 6px}
+    p{margin:8px 0;color:#333}
+    .field{background:#f4f6f9;padding:10px;border-radius:8px;margin:8px 0}
+    a.btn{display:inline-block;margin-top:12px;padding:10px 14px;background:#0a7f3b;color:#fff;text-decoration:none;border-radius:8px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Pago aprobado ✅</h1>
+    <p>Tu reserva se realizó correctamente. A continuación los datos:</p>
+    <div id="datos"></div>
+    <a class="btn" id="volver" href="index.html">Volver a menu principal</a>
+  </div>
+
+  <script>
+    function renderReserva(r){
+      const cont = document.getElementById('datos');
+      if(!r){ cont.innerHTML = '<p>No hay datos de reserva recientes.</p>'; return; }
+      cont.innerHTML = `
+        <div class="field"><strong>Cancha:</strong> ${r.cancha}</div>
+        <div class="field"><strong>Tipo:</strong> ${r.tipo || '—'}</div>
+        <div class="field"><strong>Precio:</strong> $${r.precio || '—'}</div>
+        <div class="field"><strong>Inicio:</strong> ${r.inicio}</div>
+        <div class="field"><strong>Fin:</strong> ${r.fin}</div>
+      `;
+    }
+
+    try{
+      const raw = sessionStorage.getItem('ultimaReserva');
+      const reserva = raw ? JSON.parse(raw) : null;
+      renderReserva(reserva);
+      // opcional: limpiar después de mostrar
+      sessionStorage.removeItem('ultimaReserva');
+    }catch(e){
+      document.getElementById('datos').innerHTML = '<p>Error al leer los datos de reserva.</p>';
+      console.error(e);
+    }
+  </script>
+</body>
+</html>
