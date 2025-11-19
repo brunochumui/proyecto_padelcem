@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendario Canchas Pádel</title>
-  <!-- FullCalendar CSS (cargar antes de tu CSS para que puedas sobreescribir) -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
    <link rel="stylesheet" href="../calendario.css">
 </head>
@@ -23,7 +22,6 @@
     let pagoCompletado = false;
 
 const calendar = new FullCalendar.Calendar(calendarEl, {
-  // Mostrar sólo UN DÍA a la vez; usar flechas para navegar entre días
   initialView: 'timeGridDay',
   headerToolbar: {
     left: 'prev,next today',
