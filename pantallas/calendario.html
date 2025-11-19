@@ -10,16 +10,18 @@
 <body>
    <button class="volver-btn" id="volverBtn">Volver</button>
   <h2 class="titulo">Reservas de Canchas de Pádel</h2>
-  <button id="reservarBtn" onclick="index.html">Pagar y confirmar reserva</button>
+  <button id="reservarBtn">Pagar y confirmar reserva</button>
   <div id="calendar"></div>
  
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
   
   <script>
-    const calendarEl = document.getElementById('calendar');
-    let selectedSlot = null;
-    let pagoCompletado = false;
+  const calendarEl = document.getElementById('calendar');
+  let selectedSlot = null;
+  let pagoCompletado = false;
+  // Evento temporal que marca la franja seleccionada en el calendario
+  let tempEvent = null;
 
 const calendar = new FullCalendar.Calendar(calendarEl, {
   initialView: 'timeGridDay',
@@ -57,49 +59,192 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
       calendar.setOption('slotMaxTime', '24:00:00');
     }
   },
-  select: function(info) {
-    const cancha = prompt("Elegí la cancha: 1 o 2");
-    if (cancha === "1" || cancha === "2") {
-      selectedSlot = { ...info, cancha: cancha };
-      alert(`Horario seleccionado: ${info.startStr} a ${info.endStr}\nCancha: ${cancha}`);
-    } else {
-      selectedSlot = null;
-      alert("Debés elegir una cancha válida (1 o 2).");
+    select: function(info) {
+    // Eliminar cualquier selección temporal anterior antes de crear una nueva
+    if (tempEvent) {
+      try { tempEvent.remove(); } catch (e) { /* ignore */ }
+      tempEvent = null;
     }
+    // Añadir un evento temporal para que la franja quede marcada visualmente
+    tempEvent = calendar.addEvent({
+      title: 'Horario seleccionado',
+      start: info.start,
+      end: info.end,
+      allDay: false,
+      // usar una apariencia clara; FullCalendar acepta color/borderColor
+      backgroundColor: '#ff7a59',
+      borderColor: '#ff7a59'
+    });
+
+    fetch('./api.php')
+      .then(async res => {
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error('api.php returned HTTP', res.status, txt);
+          throw new Error('Respuesta de la API no OK: ' + res.status);
+        }
+        const text = await res.text();
+        try {
+          return JSON.parse(text);
+        } catch (err) {
+          // Mostrar el texto recibido para facilitar diagnóstico (p.ej. errores PHP)
+          console.error('Respuesta no JSON desde api.php:', text);
+          throw err;
+        }
+      })
+      .then(courts => {
+        if (!Array.isArray(courts) || courts.length === 0) {
+          alert('No hay canchas disponibles.');
+          return;
+        }
+
+        const modal = document.createElement('div');
+        Object.assign(modal.style, {
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.45)', zIndex: 9999
+        });
+
+        const box = document.createElement('div');
+        Object.assign(box.style, {
+          background: '#fff', padding: '18px', borderRadius: '8px',
+          maxWidth: '420px', width: '90%', boxShadow: '0 6px 24px rgba(0,0,0,0.2)'
+        });
+
+        const title = document.createElement('h3');
+        title.textContent = 'Elegí la cancha';
+        box.appendChild(title);
+
+        courts.forEach(court => {
+          const id = court.ID_cancha ?? '—';
+          const tipo = court.Tipo ?? '—';
+          const precio = court.Precio_hora ?? '—';
+          const seña = court.Seña ?? '20000';
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = `Cancha ${id} — ${tipo} — $${precio} - Seña: $${seña}`;
+          Object.assign(btn.style, { display: 'block', width: '100%', margin: '8px 0', padding: '8px' });
+
+          btn.addEventListener('click', () => {
+            // Normalizamos selectedSlot: guardamos start/end como cadenas (ISO) y también startStr/endStr
+            selectedSlot = {
+              cancha: id,
+              tipo: tipo,
+              precio: precio,
+              start: info.startStr || info.start,
+              end: info.endStr || info.end,
+              startStr: info.startStr || (info.start && info.start.toISOString && info.start.toISOString()),
+              endStr: info.endStr || (info.end && info.end.toISOString && info.end.toISOString())
+            };
+
+            // actualizar el evento temporal para mostrar la cancha elegida
+            if (tempEvent) {
+              try {
+                tempEvent.setProp('title', `Cancha ${id} — ${tipo}`);
+                tempEvent.setExtendedProp('selectedCancha', id);
+              } catch (e) { /* ignore si no disponible */ }
+            }
+
+            // cerrar modal
+            try { document.body.removeChild(modal); } catch (e) { /* ignore si ya fue removido */ }
+
+            alert(`Horario seleccionado: ${selectedSlot.start} a ${selectedSlot.end}\nCancha: ${id}\nTipo: ${tipo}\nPrecio: $${precio}`);
+          });
+
+          box.appendChild(btn);
+        });
+
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.textContent = 'Cancelar';
+        Object.assign(cancel.style, { display: 'block', width: '100%', margin: '6px 0', padding: '8px', background: '#eee' });
+        cancel.addEventListener('click', () => {
+          selectedSlot = null;
+          // eliminar el evento temporal al cancelar
+          if (tempEvent) {
+            try { tempEvent.remove(); } catch (e) { }
+            tempEvent = null;
+          }
+          document.body.removeChild(modal);
+        });
+        box.appendChild(cancel);
+
+        modal.appendChild(box);
+        document.body.appendChild(modal);
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error al cargar las canchas.');
+      });
   }
 });
  
      calendar.render();
 
     document.getElementById("reservarBtn").addEventListener("click", async () => {
-      if (!selectedSlot) {
-        alert("Primero seleccioná un horario y una cancha en el calendario.");
-        return;
-      }
+      // Nuevo flujo: sin pago externo. Guardamos la reserva y redirigimos a aceptado.html
+      try {
+        if (!selectedSlot) {
+          alert("Primero seleccioná un horario y una cancha en el calendario.");
+          return;
+        }
 
-      const response = await fetch("http://localhost:8080/create_preference", { method: "POST" });
-      const data = await response.json();
-      if (data.link) {
-        window.location.href = data.link;
-      } else {
-        alert("No se pudo generar el link de pago.");
-        return;
-      }
+        const resumen = `Vas a reservar Cancha ${selectedSlot.cancha}\nTipo: ${selectedSlot.tipo || '—'}\nPrecio: $${selectedSlot.precio || '—'}\nHorario: ${selectedSlot.start.substring(11, 16)} a ${selectedSlot.end.substring(11, 16)}\n\nConfirmar y finalizar reserva?`;
+        if (!confirm(resumen)) return;
 
-      setTimeout(() => {
-        pagoCompletado = true;
-        calendar.addEvent({
-          title: `Cancha ${selectedSlot.cancha} Reservada`,
-          start: selectedSlot.start,
-          end: selectedSlot.end
+        // Guardar la reserva localmente mediante el endpoint PHP
+        const guardarResp = await fetch("guardar_reserva.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cancha: selectedSlot.cancha,
+            inicio: selectedSlot.start,
+            fin: selectedSlot.end,
+            tipo: selectedSlot.tipo,
+            precio: selectedSlot.precio
+          })
         });
-        alert("✅ Pago confirmado y reserva realizada!");
-        selectedSlot = null;
-      }, 5000);
-    });
 
-    document.getElementById("volverBtn").addEventListener("click", () => {
-      window.location.href = "index.html";
+        if (guardarResp.ok) {
+          // Guardar datos de la reserva en sessionStorage para mostrarlos en aceptado.html
+          try {
+            const reservaParaMostrar = {
+              cancha: selectedSlot.cancha,
+              tipo: selectedSlot.tipo,
+              precio: selectedSlot.precio,
+              inicio: selectedSlot.startStr,
+              fin: selectedSlot.endStr
+            };
+            sessionStorage.setItem('ultimaReserva', JSON.stringify(reservaParaMostrar));
+          } catch (e) {
+            console.warn('No se pudo guardar la reserva en sessionStorage:', e);
+          }
+          // Opcional: marcar evento final en calendario
+          calendar.addEvent({
+            title: `Cancha ${selectedSlot.cancha} Reservada`,
+            start: selectedSlot.start,
+            end: selectedSlot.end
+          });
+
+          // Limpiar selección temporal
+          if (tempEvent) {
+            try { tempEvent.remove(); } catch (e) { }
+            tempEvent = null;
+          }
+
+          selectedSlot = null;
+          // Redirigir a pantalla local de pago aceptado
+          window.location.href = './aceptado.html';
+        } else {
+          const txt = await guardarResp.text();
+          console.error('Error guardando reserva:', guardarResp.status, txt);
+          alert('No se pudo guardar la reserva. Revisa la consola para más detalles.');
+        }
+      } catch (err) {
+        console.error('Error en flujo de reserva:', err);
+        alert('Ocurrió un error al procesar la reserva. Revisa la consola.');
+      }
     });
   </script>
 </body>
