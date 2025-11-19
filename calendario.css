@@ -1,6 +1,4 @@
-/* Estilos externos para pantallas/calendario.html */
 
-/* Fondo y tipografía */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -13,7 +11,6 @@ body {
   min-height: 100vh;
 }
 
-/* Título */
 .titulo {
   font-size: 50px;
   color: #ffffff;
@@ -22,20 +19,18 @@ body {
   text-shadow: 0 2px 4px rgba(0,0,0,0.6);
 }
 
-/* Contenedor del calendario */
 #calendar {
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
   padding: 15px;
-  background-color: rgba(30,61,89,0.9); /* #1e3d59e4 */
+  background-color: rgba(30,61,89,0.9);
   border-radius: 20px;
   box-sizing: border-box;
   color: #9d9218;
   box-shadow: 0 6px 18px rgba(0,0,0,0.35);
 }
 
-/* Botón reservar */
 #reservarBtn {
   display: block;
   margin: 20px auto;
@@ -52,7 +47,6 @@ body {
 #reservarBtn:hover { background-color: #009244; }
 #reservarBtn:active { transform: translateY(1px); }
 
-/* Botón volver */
 .volver-btn {
   position: absolute;
   top: 20px;
@@ -69,7 +63,6 @@ body {
 }
 .volver-btn:hover { background-color: #222; }
 
-/* FullCalendar tweaks */
 .fc {
   color-scheme: light;
 }
@@ -90,8 +83,6 @@ body {
   padding: 4px 6px;
   border-radius: 6px;
 }
-
-/* Responsivo */
 @media (max-width: 768px) {
   body { padding: 10px; }
   .titulo { font-size: 34px; }

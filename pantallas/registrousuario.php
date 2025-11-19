@@ -5,9 +5,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre = $_POST['nombre'];
     $correo = $_POST['email'];
     $telefono = $_POST['telefono'];
-    $contraseña = password_hash($_POST['contraseña'], PASSWORD_DEFAULT); // más seguro
+    $contraseña = password_hash($_POST['contraseña'], PASSWORD_DEFAULT);
 
-    // Verificar si el correo ya existe
     $verificar = "SELECT * FROM usuarios WHERE Correo='$correo'";
     $resultado = mysqli_query($conexion, $verificar);
 
@@ -15,11 +14,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "<script>alert('El correo ya está registrado'); window.location.href='registro.html';</script>";
         exit;
     }
-
-    // Insertar nuevo usuario
     $sql = "INSERT INTO usuarios (Nombre, Correo, Telefono, Clave) VALUES ('$nombre', '$correo', '$telefono', '$contraseña')";
     if (mysqli_query($conexion, $sql)) {
-        // Redirigir al index después del registro
         echo "<script>alert('Registro exitoso'); window.location.href='../index.html';</script>";
     } else {
         echo "Error: " . mysqli_error($conexion);
