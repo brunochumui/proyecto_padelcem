@@ -16,7 +16,7 @@ if ($nombre === '' || $correo === '' || $telefono === '' || $pass_raw === '') {
     exit;
 }
 
-// Verificar si ya existe el email usando prepared statement
+// Verificar si ya existe el email
 $stmt = $conn->prepare("SELECT COUNT(*) AS cnt FROM usuarios WHERE correo = ?");
 if (!$stmt) {
     error_log("Prepare failed: " . $conn->error);

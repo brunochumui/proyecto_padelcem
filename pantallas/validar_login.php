@@ -31,7 +31,7 @@ if ($result && $result->num_rows === 1) {
     $hash = $row['contraseña']; // columna con la contraseña hasheada
 
     if (password_verify($password, $hash)) {
-        // Inicio de sesión OK
+      
         $_SESSION['user'] = [
             'id' => $row['ID_usuario'],
             'nombre' => $row['nombre'],
